@@ -43,8 +43,11 @@ jobs:
           test -d DungeonMaps/test/hybrid
           echo "Hybrid maps: $(find DungeonMaps/test/hybrid -maxdepth 1 -name '*.png' | wc -l)"
 
-      - name: Run smoke configuration test
-        run: python -m pytest tests/test_chatgpt_smoke_test.py -q
+      - name: Run smoke configuration tests
+        run: python -m pytest tests/test_chatgpt_smoke_test.py tests/test_profile_ir2.py -q
 
       - name: Run one IR2 hybrid inference episode
         run: python chatgpt_smoke_test.py
+
+      - name: Run IR2 profiler
+        run: python profile_ir2.py
