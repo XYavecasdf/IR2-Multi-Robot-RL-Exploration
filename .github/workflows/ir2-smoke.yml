@@ -1,0 +1,51 @@
+name: IR2 inference smoke test
+
+on:
+  push:
+    branches:
+      - chatgpt/ir2-env-smoke
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      MPLBACKEND: Agg
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.8"
+          cache: pip
+
+      - name: Install smoke-test dependencies
+        run: |
+          python -m pip install --upgrade "pip<25"
+          python -m pip install \
+            numpy==1.23.5 \
+            torch==1.10.0 \
+            scikit-image==0.19.3 \
+            scikit-learn==1.2.1 \
+            scipy==1.10.0 \
+            matplotlib==3.6.3 \
+            imageio==2.31.6 \
+            pytest==7.4.4
+
+      - name: Verify repository assets
+        run: |
+          python --version
+          ls -lh model/stage2/checkpoint.pth
+          test -d DungeonMaps/test/hybrid
+          echo "Hybrid maps: $(find DungeonMaps/test/hybrid -maxdepth 1 -name '*.png' | wc -l)"
+
+      - name: Run smoke configuration test
+        run: python -m pytest tests/test_chatgpt_smoke_test.py -q
+
+      - name: Run one IR2 hybrid inference episode
+        run: python chatgpt_smoke_test.py
